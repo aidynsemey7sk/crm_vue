@@ -55,7 +55,7 @@
         }
       },
       methods: {
-          submitForm() {
+          async submitForm() {
               this.errors = []
 
               if (this.email === '') {
@@ -75,12 +75,15 @@
               }
 
               if (!this.errors.length) {
+                  this.$store.commit('setIsLoading', true)
+
                   const formData = {
-                      email: this.email,
+                      username: this.email,
+                    //   email: this.email,
                       password: this.password1,
                   }
 
-                  axios
+                  await axios
                         .post('/api/v1/users/', formData)
                         .then(response => {
                             toast({
@@ -103,6 +106,7 @@
                                 this.errors.push("что-то пошло не так, попробуйте снова!")
                             }      
                         })
+                      this.$store.commit('setIsLoading', false)
               }
 
               console.log('submitForm')
