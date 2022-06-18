@@ -7,6 +7,8 @@ import SignUp from "../views/SignUp.vue";
 import LogIn from "../views/LogIn.vue";
 import Dashboard from "../views/dashboard/Dashboard.vue";
 import MyAccount from "../views/dashboard/MyAccount.vue";
+import Leads from "../views/dashboard/Leads.vue";
+import AddLead from "../views/dashboard/AddLead.vue";
 
 const routes = [
   {
@@ -41,6 +43,22 @@ const routes = [
     },
   },
   {
+    path: "/dashboard/leads",
+    name: "Leads",
+    component: Leads,
+    meta: {
+      requireLogin: true,
+    },
+  },
+  {
+    path: "/dashboard/leads/add",
+    name: "AddLead",
+    component: AddLead,
+    meta: {
+      requireLogin: true,
+    },
+  },
+  {
     path: "/about",
     name: "about",
     // route level code-splitting
@@ -58,7 +76,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (
-    to.matched.some((record) =>  record.meta.requireLogin) &&
+    to.matched.some((record) => record.meta.requireLogin) &&
     !store.state.isAuthenticated
   ) {
     next("/log-in");
