@@ -2,18 +2,18 @@
     <div class="container">
         <div class="columns is-multiline">
             <div class="column is-12">
-                <h1 class="title">Add lead</h1>
+                <h1 class="title">Edit {{ lead.company }}</h1>
             </div>
 
             <div class="column is-12">
-                <form @submit.prevent="submitForm">
+                <form  @submit.prevent="submitForm">
                     <div class="field">
                         <label>Company</label>
                         <div class="control">
                             <input 
                             type="text" 
                             class="input"
-                            v-model="company">
+                            v-model="lead.company">
 
                         </div>
                     </div>
@@ -24,7 +24,7 @@
                             <input 
                             type="text"
                             class="input"
-                            v-model="contact_person">
+                            v-model="lead.contact_person">
 
                         </div>
                     </div>
@@ -35,7 +35,7 @@
                             <input 
                             type="email"
                             class="input"
-                            v-model="email">
+                            v-model="lead.email">
 
                         </div>
                     </div>
@@ -46,7 +46,7 @@
                             <input 
                             type="text"
                             class="input"
-                            v-model="phone">
+                            v-model="lead.phone">
 
                         </div>
                     </div>
@@ -57,7 +57,7 @@
                             <input 
                             type="text"
                             class="input"
-                            v-model="website">
+                            v-model="lead.website">
 
                         </div>
                     </div>
@@ -68,7 +68,7 @@
                             <input 
                             type="number"
                             class="input"
-                            v-model="confidence">
+                            v-model="lead.confidence">
 
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                             <input 
                             type="number"
                             class="input"
-                            v-model="estimated_value">
+                            v-model="lead.estimated_value">
 
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                         <div class="control">
                             <div class="select">
                                 <select class="select"
-                                v-model="status">
+                                v-model="lead.status">
                                 <option value="new">New</option>
                                 <option value="contacted">Contacted</option>
                                 <option value="inprogress">In progress</option>
@@ -105,7 +105,7 @@
                         <div class="control">
                             <div class="select">
                                 <select class="select"
-                                v-model="priority">
+                                v-model="lead.priority">
                                 <option value="low">Low</option>
                                 <option value="medium">Medium</option>
                                 <option value="high">High</option>
@@ -117,7 +117,7 @@
                     <div class="field">
                         <div class="control">
                             <button class="button is-success">
-                                Submit
+                                Update
                             </button>
                         </div>
                     </div>
@@ -128,58 +128,61 @@
 </template>
 
 <script>
-  import { toast } from 'bulma-toast'
-  import axios from 'axios'
-  export default {
-      name: 'AddLead',
-      data() {
-        return {
-            company: '',
-            contact_person: '',
-            email: '',
-            phone: '',
-            website: '',
-            confidence: 0,
-            estimated_value: 0,
-            status: 'new',
-            priority: 'medium'
-        }
-      },
-      methods: {
-        async submitForm() {
-            this.$store.commit('setIsLoading', true)
-            const lead = {
-                'company': this.company,
-                'contact_person': this.contact_person,
-                'email': this.email,
-                'phone': this.phone,
-                'website': this.website,
-                'confidence': this.confidence,
-                'estimated_value': this.estimated_value,
-                'status': this.status,
-                'priority': this.priority,
+import { toast } from 'bulma-toast'
+import axios from 'axios'
+    export default {
+        name: 'EditLead',
+        data() {
+            return {
+                lead: {},
             }
+        },
+        mounted() {
+            
+        },
+        beforeMount() {
+            this.getLead()
+        },
+        methods: {
+            async getLead() {
+                this.$store.commit('setIsLoading', true)
 
-            await axios
-                .post('/api/v1/leads/', lead)
-                .then(response => {
-                    toast({
-                            message: 'The lead was added',
+                const leadId = this.$route.params.id
+
+                axios
+                    .get(`/api/v1/leads/${leadId}/`)
+                    .then(response => {
+                        this.lead = response.data
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    })
+                this.$store.commit('setIsLoading', false)
+            },
+            async submitForm() {
+                this.$store.commit('setIsLoading', true)
+
+                const leadID = this.$route.params.id
+                axios
+                    .patch(`/api/v1/leads/${leadID}/`, this.lead)
+                    .then(response => {
+                        toast({
+                            message: 'The lead was updated',
                             type: 'is-success',
                             dismissible: true,
                             pauseOnHover: true,
                             duration: 2000,
                             position: 'bottom-right',
                         })
+                        this.$router.push(`/dashboard/leads/${leadID}`)
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    })
+                this.$store.commit('setIsLoading', false)
+            },
 
-                    this.$router.push('/dashboard/leads')
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-
-            this.$store.commit('setIsLoading', false)
-        }
-      }
-  }
+        },
+            
+    }
 </script>
